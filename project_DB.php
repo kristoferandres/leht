@@ -2,9 +2,9 @@
 <?php
 // Database connection settings
 
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '');
+define('DB_SERVER', '192.168.124.14');
+define('DB_USERNAME', 'kandres');
+define('DB_PASSWORD', 'kandres');
 $dbname = "allprojects";
 
 // Create the database connection
