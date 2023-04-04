@@ -83,7 +83,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(empty($username_err) && empty($password_err) && empty($confirm_password_err)){
 
         // create database connection
-        require_once "config.php";
+        require "config.php";
 
         // check connection
         if($conn === false){
