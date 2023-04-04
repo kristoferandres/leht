@@ -3,31 +3,38 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Include the PHPMailer library
-require 'vendor/autoload.php';
+require 'PHPMailer-master/src/Exception.php';
+require 'PHPMailer-master/src/PHPMailer.php';
+require 'PHPMailer-master/src/SMTP.php';
 
 // Instantiate PHPMailer
 $mail = new PHPMailer(true);
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+  }
+$databaseusername = $dbname = $_SESSION['username'];
 
 try {
     // Set up SMTP connection
     $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
+    $mail->Host = 'smtp.porkbun.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'projectmanagement1@gmail.com';
+    $mail->Username = 'kandres@kandres.buzz';
     $mail->Password = 'Azqxwcevrbt';
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 
     // Set up email message
-    $mail->setFrom('projectmanagement1@gmail.com', 'project management');
+    $mail->setFrom('kandres@kandres.buzz', 'kandres');
     $mail->addAddress('kristofer.andres6888@gmail.com', 'Kristofer Andres');
-    $mail->Subject = 'Test email from PHP';
-    $mail->Body = 'This is a test email from PHPMailer.';
+    $mail->Subject = 'Account activation request';
+    $mail->Body = 'Request for account named: '.$databaseusername;
 
     // Send the email
     $mail->send();
     echo 'Email sent successfully';
 } catch (Exception $e) {
-    echo "Error sending email: {$mail->ErrorInfo}";
+    $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+    $mail->Debugoutput = 'error_log';
 }
 ?>
