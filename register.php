@@ -17,16 +17,16 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $username_err = "Please enter a username.";
         } else{
             // create database connection
-            $mysqli = new mysqli("localhost", "root", "", "login");
+            require_once "config.php";
     
             // check connection
-            if($mysqli === false){
-                die("ERROR: Could not connect. " . $mysqli->connect_error);
+            if($conn === false){
+                die("ERROR: Could not connect. " . $conn->connect_error);
             }
     
             // prepare statement
             $sql = "SELECT id FROM users WHERE username = ?";
-            if($stmt = $mysqli->prepare($sql)){
+            if($stmt = $conn->prepare($sql)){
     
                 // bind parameters
                 $stmt->bind_param("s", $param_username);
@@ -47,7 +47,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     }
     
                 } else{
-                    echo "ERROR: Could not execute query: $sql. " . $mysqli->error;
+                    echo "ERROR: Could not execute query: $sql. " . $conn->error;
                 }
     
                 // close statement
@@ -55,7 +55,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             }
     
             // close connection
-            $mysqli->close();
+            $conn->close();
         }
         
 
@@ -80,19 +80,19 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
 
     // if no errors, register user
-    if(empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_password_err)){
+    if(empty($username_err) && empty($password_err) && empty($confirm_password_err)){
 
         // create database connection
-        $mysqli = new mysqli("localhost", "root", "", "login");
+        require_once "config.php";
 
         // check connection
-        if($mysqli === false){
-            die("ERROR: Could not connect. " . $mysqli->connect_error);
+        if($conn === false){
+            die("ERROR: Could not connect. " . $conn->connect_error);
         }
 
         // prepare statement
         $sql = "INSERT INTO users (username, password) VALUES (?,  ?)";
-        if($stmt = $mysqli->prepare($sql)){
+        if($stmt = $conn->prepare($sql)){
 
             // bind parameters
             $stmt->bind_param("ss", $param_username,  $param_password);
@@ -106,7 +106,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 // redirect to login page
                 header("location: index.php");
             } else{
-                echo "ERROR: Could not execute query: $sql. " . $mysqli->error;
+                echo "ERROR: Could not execute query: $sql. " . $conn->error;
             }
 
             // close statement
@@ -114,7 +114,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         }
 
         // close connection
-        $mysqli->close();
+        $conn->close();
     }
 }
 ?>
