@@ -42,8 +42,8 @@ $result = mysqli_query($conn, $sql);
 mysqli_close($conn);
 
 
-// !!!!!!!NOT WORKING !!!!!!!
-console_log("asdgasdsa");
+
+
 if (isset($_GET['project_id'])) {
     $project_id = $_GET['project_id'];
     console_log($project_id);
@@ -52,7 +52,6 @@ if (isset($_GET['project_id'])) {
 
 if (isset($_SESSION['warning'])) {
     echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">' . $_SESSION['warning'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
-    var_dump( $_SESSION['warning']);
     unset($_SESSION['warning']);
     
 } 
@@ -233,9 +232,8 @@ function loadProject(projectId) {
 
         // Loop through each row and add it to the data container
         $.each(data, function(index, row) {
-          indexa = index +1
-          $('#data-container').append('<div class="offcanvas offcanvas-end" tabindex="-1" id="'+"det"+indexa+'" aria-labelledby="panelTitle" data-bs-backdrop="false" data-bs-scroll="true"> <div class="offcanvas-header"> <h5 class="offcanvas-title" id="panelTitle">'+row.name+'</h5> <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button> </div> <div class="offcanvas-body"><div class="row align-items-center" id="d'+indexa+'"> <div class="col-9"> <p class="text-break">'+row.details+'</p> <textarea type="text" style="display:none" rows="20" cols="34""> </textarea></div> <div class="col-1"> <button onclick="editdet('+indexa+')" class="btn btn-primary edit-btn" data-row-id="'+indexa+'">Edit</button> <button onclick="savedet('+indexa+')" class="btn btn-success save-btn" data-row-id="'+indexa+'" style="display:none">Save</button> </div> </div></div> </div>');
-          console.log(indexa+" "+row.name + row.details);
+          $('#data-container').append('<div class="offcanvas offcanvas-end" tabindex="-1" id="'+"det"+row.id+'" aria-labelledby="panelTitle" data-bs-backdrop="false" data-bs-scroll="true"> <div class="offcanvas-header"> <h5 class="offcanvas-title" id="panelTitle">'+row.name+'</h5> <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button> </div> <div class="offcanvas-body"><div class="row align-items-center" id="d'+row.id+'"> <div class="col-9"> <p class="text-break">'+row.details+'</p> <textarea type="text" style="display:none" rows="20" cols="34""> </textarea></div> <div class="col-1"> <button onclick="editdet('+row.id+')" class="btn btn-primary edit-btn" data-row-id="'+row.id+'">Edit</button> <button onclick="savedet('+row.id+')" class="btn btn-success save-btn" data-row-id="'+row.id+'" style="display:none">Save</button> </div> </div></div> </div>');
+          console.log(row.id+" "+row.name + row.details);
         });
       },
       error: function(jqXHR, textStatus, errorThrown) {
@@ -483,6 +481,7 @@ $.ajax({
     // If the row was saved successfully, update the row text
     console.log("saved state with: "+activeProjectId)
     loadProject(response);
+    location.reload();
   },
   error: function(xhr, status, error) {
     console.error(xhr.responseText);

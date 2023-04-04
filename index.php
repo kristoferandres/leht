@@ -1,5 +1,9 @@
+
+
 <?php
 session_start();
+
+
 
 // check if user is already logged in
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
@@ -64,7 +68,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     // bind result variables
                     mysqli_stmt_bind_result($stmt, $id, $username, $hashed_password);
                     if(mysqli_stmt_fetch($stmt)){
-                        $password = hash('sha256', $epassword);
+                        $password = hash('sha512', $epassword);
                         if($password === $hashed_password){
                             // password is correct, so start a new session
                             session_start();

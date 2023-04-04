@@ -7,7 +7,7 @@
 
 define('DB_SERVER', '192.168.124.14');
 define('DB_USERNAME', 'kandres');
-define('DB_PASSWORD', 'kandres');
+define('DB_PASSWORD', 'A1sed34gh');
 $dbname = "login";
 
 // Create the database connection
@@ -37,7 +37,7 @@ $sql = "CREATE TABLE IF NOT EXISTS users (
 if ($conn->query($sql) === false) {
   die("Error creating table: " . $conn->error);
 }
-
+/*
 $query = "SELECT COUNT(*) FROM users";
 $result = mysqli_query($conn, $query);
 $row = mysqli_fetch_row($result);
@@ -46,11 +46,11 @@ $num_users = $row[0];
 // If there are no users, add a default user with username "root" and password "root"
 if ($num_users == 0) {
     $username = "root";
-    $password = hash('sha256', 'root');
+    $password = hash('sha512', 'SecretPassw0rd!');
     $query = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
     mysqli_query($conn, $query);
 }
-
+*/
 
 // Database credentials
 define('DB_NAME', 'login');

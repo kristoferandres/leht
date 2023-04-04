@@ -1,11 +1,14 @@
 
 <?php
 // Database connection settings
-
 define('DB_SERVER', '192.168.124.14');
 define('DB_USERNAME', 'kandres');
-define('DB_PASSWORD', 'kandres');
-$dbname = "allprojects";
+define('DB_PASSWORD', 'A1sed34gh');
+// Start session if it hasn't been started already
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
+$dbname = $_SESSION['username'].'_db';
 
 // Create the database connection
 $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD);

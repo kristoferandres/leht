@@ -21,83 +21,14 @@ $query = "SELECT * FROM $table_name";
 $result = mysqli_query($conn, $query);
 
 
-// Output the rows as a table
 
-
-/*
-<div class="row">
-  <div class="col">
-    <input type="text" class="form-control" value="Your row name">
-    </div>
-  <div class="col-auto">
-    <button type="button" class="btn btn-primary">Edit</button>
-    <button type="button" class="btn btn-success d-none">Save</button>
-    <span class="badge bg-success">Active</span>
-  </div>
-</div>
-
-<div class="row" id="'.$row['id'].'">
-<div class="col">
-<p>'.$row['name'].'</p>
-<input type="text" id="input1" style="display:none">
-</div>
-<div class="col-auto">
-<button onclick="editRow('.$row['id'].')">Edit</button>
-<button onclick="saveRow('.$row['id'].')" style="display:none">Save</button>
-</div>
-</div>
-  <div class="col-md-2">
-    <span class="state">'.$row['state'].'</span>
-  </div>
-</div>
-
-
-
-
-<div class="row" id="'.$row['id'].'">
-  <div class="col flex-grow-1">
-    <p>'.$row['name'].'</p>
-    <input type="text" id="input1" style="display:none">
-  </div>
-  <div class="col-auto">
-    <button onclick="editRow('.$row['id'].')">Edit</button>
-    <button onclick="saveRow('.$row['id'].')" style="display:none">Save</button>
-  </div>
-  <div class="col-md-2">
-    <span class="state">'.$row['state'].'</span>
-  </div>
-</div>
-
-
-
-<div class="row align-items-center" id="'.$row['id'].'">
-   <div class="col flex-grow-1">
-    <p>'.$row['name'].'</p>
-    <input type="text" id="input1" style="display:none">
-  </div>
-  <div class="col-auto">
-    <button onclick="editRow('.$row['id'].')" class="btn btn-primary edit-btn" data-row-id="'.$row['id'].'">Edit</button>
-    <button onclick="saveRow('.$row['id'].')" class="btn btn-success save-btn" data-row-id="'.$row['id'].'" style="display:none">Save</button>
-  </div>
-  <div class="col">
-    <span class="state">'.$row['state'].'</span>
-  </div>
-  div class="col">
-    <button>Details</button>
-  </div>
-</div>
-
-
-
-
-<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rowDetailsModal">Details</button>
-*/
 
 echo '<div class="container">';
 while ($row = mysqli_fetch_assoc($result)) {
   $state = $row['state'];
   $rowid = $row['id'];
   $color = $state == 'done' ? 'success' : ($state == 'working' ? 'warning' : 'secondary bg-opacity-50');
+  $padding = $state == 'done' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : ($state == 'working' ? '&nbsp;' : '');
   echo'
   <div class="row align-items-center" id="'.$row['id'].'">
   <div class="col-7">
@@ -114,7 +45,7 @@ while ($row = mysqli_fetch_assoc($result)) {
   </div>
   <div class="dropdown col-1">
   <button class="btn btn-'.$color.' dropdown-toggle" type="button" id="stateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-  '.$state.'
+  '.$state.$padding.'
   </button>
   <ul class="dropdown-menu" aria-labelledby="stateDropdown">
     <li><a class="dropdown-item" onclick="savestate(\'Planning\','.$rowid.')">Planning</a></li>
