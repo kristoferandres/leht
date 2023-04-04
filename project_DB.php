@@ -21,7 +21,8 @@ if ($conn->connect_error) {
 // Create the database if it doesn't exist
 $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
 if ($conn->query($sql) === false) {
-  die("Error creating database: " . $conn->error);
+  die();
+  header('Location: sendgmail.html');
 }
 
 // Select the database
