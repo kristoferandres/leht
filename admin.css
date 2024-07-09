@@ -1,0 +1,35 @@
+.color-square {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border-radius: 2px;
+    margin-right: 5px;
+}
+
+.bg-success {
+    background-color: green;
+}
+
+.bg-danger {
+    background-color: red;
+}
+
+.bg-pink {
+    background-color: rgb(255, 69, 215);
+}
+.fade-out {
+    animation: fadeOut 0.5s ease-in;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        display: none;
+    }
+}
+
+  
+  

@@ -12,35 +12,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $row = mysqli_fetch_assoc($result);
     $table_name = $row['table_name'];
 
-
-    // Get the name and state from the form
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $state = mysqli_real_escape_string($conn, $_POST['state']);
-
     // Insert the new row into the database
-    $query = "INSERT INTO $table_name (name, state, details) VALUES ('$name', '$state', 'Task details here')";
+    $query = "INSERT INTO $table_name (name, state, details) VALUES ('Task name here', 'Planning', 'Task details here')";
     mysqli_query($conn, $query);
 
-    // Redirect back to the project page
+    // Get the last inserted row ID
+    $lastRowIdQuery = "SELECT LAST_INSERT_ID() AS last_row_id";
+    $lastRowIdResult = mysqli_query($conn, $lastRowIdQuery);
+    $lastRowIdRow = mysqli_fetch_assoc($lastRowIdResult);
+    $lastRowId = $lastRowIdRow['last_row_id'];
 
-    function console_log($output, $with_script_tags = true) {
-        $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) . 
-    ');';
-        if ($with_script_tags) {
-            $js_code = '<script>' . $js_code . '</script>';
-        }
-        echo $js_code;
-    }
-    console_log("asdasdadasd".$project_id."fdhfsgdgdafsg");
-    console_log("Location: welcome.php?project_id=$project_id");
-    if ($project_id) {
-        
-        header("Location: welcome.php?project_id=$project_id");
-      } else {
-        die("Error: Project ID is missing.");
-      }
+    // Retrieve the row details
+    $rowQuery = "SELECT name, state FROM $table_name WHERE id='$lastRowId'";
+    $rowResult = mysqli_query($conn, $rowQuery);
+    $row = mysqli_fetch_assoc($rowResult);
 
-    
+    // Determine the color and padding based on the state
+    $state = $row['state'];
+    $color = $state == 'done' ? 'success' : ($state == 'working' ? 'warning' : 'secondary bg-opacity-50');
+    $padding = $state == 'done' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : ($state == 'working' ? '&nbsp;' : '');
+
+    // Prepare the response data
+    $response = array(
+        'rowid' => $lastRowId,
+        'name' => $row['name'],
+        'state' => $row['state'],
+        'color' => $color,
+        'padding' => $padding
+    );
+
+    // Convert the response data to JSON format
+    $responseJson = json_encode($response);
+
+    // Send the response back to the client
+    header('Content-Type: application/json');
+    echo $responseJson;
     exit();
 } else {
     // If the form wasn't submitted, redirect back to the home page

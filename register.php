@@ -9,6 +9,18 @@ $email_err = "";
 $password_err = "";
 $confirm_password_err = "";
 
+function generateRandomString($length = 8) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $randomString = '';
+    $max = strlen($characters) - 1;
+
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[random_int(0, $max)];
+    }
+
+    return $randomString;
+}
+
 // check if form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
@@ -90,22 +102,61 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             die("ERROR: Could not connect. " . $conn->connect_error);
         }
 
+        // Check if the generated random string is already used in either column
+    $sql_check = "SELECT id FROM users WHERE identifier = ? OR guest_identifier = ?";
+    if ($stmt_check = $conn->prepare($sql_check)) {
+        // bind parameters
+        $stmt_check->bind_param("ss", $randomString, $randomString);
+
+        // execute statement
+        if ($stmt_check->execute()) {
+            // store result
+            $stmt_check->store_result();
+
+            if ($stmt_check->num_rows > 0) {
+                // If the random string already exists, generate a new one
+                $randomString = generateRandomString(8);
+            }
+        } else {
+            echo "ERROR: Could not execute query: $sql_check. " . $conn->error;
+        }
+
+        // close statement
+        $stmt_check->close();
+    }
+
         // prepare statement
-        $sql = "INSERT INTO users (username, password) VALUES (?,  ?)";
+        $sql = "INSERT INTO users (username, password, identifier) VALUES (?,  ?,  ?)";
         if($stmt = $conn->prepare($sql)){
 
             // bind parameters
-            $stmt->bind_param("ss", $param_username,  $param_password);
+            $stmt->bind_param("sss", $param_username,  $param_password, $randomString);
 
             // set parameters
             $param_username = $username;
             $param_password = hash('sha512', $password); // hash password
+            $randomString = generateRandomString(8);
 
-            // execute statement
-            if($stmt->execute()){
-                // redirect to login page
-                header("location: index.php");
-            } else{
+
+
+
+             // execute statement
+             if ($stmt->execute()) {
+                // set session variables
+                session_start();
+                $_SESSION["loggedin"] = true;
+                $_SESSION["id"] = $stmt->insert_id;
+                $_SESSION["username"] = $username;
+                $_SESSION["identifier"] = $randomString;
+                $_SESSION["admin_low"] = false;
+                $_SESSION["admin_high"] =false;
+                $_SESSION["admin_super_high"] = false;
+       
+
+                // redirect to welcome page
+                header("location: welcome.php");
+                exit;
+            } else {
                 echo "ERROR: Could not execute query: $sql. " . $conn->error;
             }
 

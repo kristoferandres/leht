@@ -4,10 +4,22 @@
 session_start();
 
 
+if (isset($_GET['share'])) {
+    // Retrieve the share identifier from the query parameter
+    $shareIdentifier = $_GET['share'];
+
+    // Store the share identifier in a session variable
+    $_SESSION['guest_identifier'] = $shareIdentifier;
+
+    // Redirect to guest_welcome.php
+    header("Location: guest_welcome.php");
+    exit;
+}
+
 
 // check if user is already logged in
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("location: welcome.php");
+        header("location: welcome.php");
     exit;
 }
 
@@ -38,7 +50,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // validate credentials
     if(empty($username_err) && empty($epassword_err)){
         // prepare a select statement
-        $sql = "SELECT id, username, password FROM users WHERE username = ?";
+        $sql = "SELECT id, username, password, identifier, admin_high, admin_low, admin_super_high FROM users WHERE username = ?";
         
         if($stmt = mysqli_prepare($link, $sql)){
             // bind variables to the prepared statement as parameters
@@ -66,19 +78,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 // check if username exists, if yes then verify password
                 if(mysqli_stmt_num_rows($stmt) == 1){                    
                     // bind result variables
-                    mysqli_stmt_bind_result($stmt, $id, $username, $hashed_password);
+                    mysqli_stmt_bind_result($stmt, $id, $username, $hashed_password, $identifier, $admin_high, $admin_low, $admin_super_high);
                     if(mysqli_stmt_fetch($stmt)){
                         $password = hash('sha512', $epassword);
                         if($password === $hashed_password){
-                            // password is correct, so start a new session
-                            session_start();
                             
                             // store data in session variables
                             $_SESSION["loggedin"] = true;
                             $_SESSION["id"] = $id;
-                            $_SESSION["username"] = $username;                            
+                            $_SESSION["username"] = $username;
+                            $_SESSION["admin_low"] = $admin_low;
+                            $_SESSION["admin_high"] = $admin_high;
+                            $_SESSION["admin_super_high"] = $admin_super_high;
+                            $_SESSION["identifier"] = $identifier;                            
                             
                             // redirect user to welcome page
+
                             header("location: welcome.php");
                         } else{
                             // display an error message if password is not valid

@@ -12,6 +12,7 @@ function console_log($output, $with_script_tags = true) {
 
 session_start();
 
+
 // check if user is not logged in
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: index.php");
@@ -19,7 +20,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 }
 
 // set cookie
-setcookie("username", $_SESSION["username"], time() + 3600, "/"); // cookie lasts for 1 hour
 
 ?>
 
@@ -79,26 +79,7 @@ if (isset($_SESSION['warning'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<style>
-        .navbar-brand {
-            margin-right: auto;
-        }
-  .project-container {
-    position: relative;
-    display: inline-block;
-  }
-  .close-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 5px;
-    padding: 0;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-  }
-</style>
+    <link rel="stylesheet" href="welcome.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -115,6 +96,26 @@ if (isset($_SESSION['warning'])) {
                 </ul>
             </div>
             <ul class="navbar-nav ml-auto">
+
+
+
+                            <?php
+                if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
+                  // Redirect logged-in users to the appropriate page based on their admin levels
+                  if ($_SESSION["admin_low"]) {
+                      echo '<button onclick="window.location.href = \'admin_low_page.php\';" class="button-link me-2">admin low page</button>';
+                  } elseif ($_SESSION["admin_high"]) {
+                      echo '<button onclick="window.location.href = \'admin_high_page.php\';" class="button-link me-2">admin high page</button>';
+                  } elseif ($_SESSION["admin_super_high"]) {
+                      echo '<button onclick="window.location.href = \'admin_super_high_page.php\';" class="button-link-super me-2">Admin Super High Page</button>';
+                  }
+                }
+                ?>
+
+            <li class="nav-item me">
+                    <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#shareModal">Share</button>
+                </li>
+
                 <li class="nav-item">
                 <a href="logout.php" class="btn btn-danger">Logout</a>
                 </li>
@@ -126,8 +127,9 @@ if (isset($_SESSION['warning'])) {
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 sidebar">
-            <div class="list-group">
-            <?php
+            <div  class="list-group">
+              <div id="project_list">
+              <?php
                 // Loop through the projects and display them in the sidebar
 
                 while ($row = mysqli_fetch_assoc($result)) {
@@ -141,6 +143,9 @@ if (isset($_SESSION['warning'])) {
 
                 }
                 ?>
+
+              </div>
+            
                 <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#addProjectModal">
             Add Project
             
@@ -174,38 +179,131 @@ if (isset($_SESSION['warning'])) {
 <div id="data-container"></div>
 
 
-
-
-
-
-    <!-- Add Project Modal -->
-    <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addProjectModalLabel">Add Project</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="addproject.php" method="POST">
-                                <div class="mb-3">
-                                    <label for="projectTitle" class="form-label">Project Title </label>
-                                    <input type="text" class="form-control" id="projectTitle" name="projectTitle" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save</button>
-                            </form>
-                        </div>
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Share Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" id="shareDurationGroup">
+                    <label for="shareDuration">Share Duration:</label>
+                    <div class="d-flex align-items-center">
+                        <input type="range" class="form-range flex-grow-1" min="1" max="24" value="1" id="shareDuration" name="shareDuration" oninput="updateDurationLabel(this.value)">
+                        <span class="ms-2" id="durationLabel">1 Hour</span>
                     </div>
                 </div>
+                <div class="form-group" id="timeLeftGroup" style="display: none;">
+                    <label for="timeLeft">Time Left:</label>
+                    <div class="d-flex align-items-center">
+                        <span class="ms-2" id="timeLeft"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="shareLink">Share Link:</label>
+                    <div class="d-flex">
+                        <span id="shareLink" class="form-control-plaintext flex-grow-1">Not sharing</span>
+                        <button class="btn btn-outline-secondary ms-2" type="button" id="copyButton">Copy</button>
+                        <div class="notification" id="copyNotification">Copied!</div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="stopSharingButton" type="button" class="btn btn-danger" style="display: none;">Stop Sharing</button>
+                    <button id="startSharingButton" type="button" class="btn btn-primary">Start Sharing</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
+        </div>
+    </div>
 </div>
+
+
+
+
+ <!-- Add Project Modal -->
+<div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProjectModalLabel">Add Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProjectForm">
+                    <div class="mb-3">
+                        <label for="projectTitle" class="form-label">Project Title</label>
+                        <input type="text" class="form-control" id="projectTitle" name="projectTitle" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script>
+
+
+
+document.getElementById('addProjectForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Get form data
+        var formData = new FormData(this);
+
+        // Make an AJAX call
+        $.ajax({
+            url: 'addproject.php',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+    // Handle the success response here
+    console.log(response);
+
+    // Parse the JSON response
+    const responseData = JSON.parse(response);
+
+    // Extract the project ID and title from the response
+    const projectId = responseData.projectId;
+    const projectTitle = responseData.projectTitle;
+
+    // Create the HTML for the new project entry
+    const projectEntry = `
+        <div class="d-flex align-items-center justify-content-between">
+            <a onclick="loadProject(${projectId})" class="sidebar-project list-group-item list-group-item-action" data-project-id="${projectId}">${projectTitle}</a>
+            <button class="btn-close" onclick="deleteProject(${projectId})"></button>
+        </div>
+    `;
+
+    // Append the new project entry to the project_list div
+    const projectList = document.getElementById('project_list');
+    projectList.insertAdjacentHTML('beforeend', projectEntry);
+
+  // Clear the input fields in the modal
+document.getElementById('projectTitle').value = '';
+
+    // Close the modal
+    $('#addProjectModal').modal('hide');
+
+},
+            error: function(xhr, status, error) {
+                // Handle the error response here
+                console.error(xhr.responseText);
+            }
+        });
+    });
+    
         
-function loadProject(projectId) {
-    setActiveProject(projectId);
+    function loadProject(projectId) {
+  setActiveProject(projectId);
   // Make an AJAX call to fetch the project details
   $.ajax({
     url: 'getproject.php',
@@ -214,12 +312,156 @@ function loadProject(projectId) {
     success: function(response) {
       // Update the project content with the fetched data
       $('#projectContent').html(response);
-            // Set the active project
-            console.log("loadproject with projectid = "+projectId);
-            history.pushState(null, null, '?project_id=' + projectId);
-    }
+      // Set the active project
+      console.log("loadproject with projectid = " + projectId);
+      history.pushState(null, null, '?project_id=' + projectId);
 
+      // Add Row button click event listener
+      const addRowButton = document.getElementById('addRowButton');
+      addRowButton.addEventListener('click', function() {
+        const projectID = projectId;
+        // Make an AJAX call to addrow.php
+        $.ajax({
+          url: 'addrow.php',
+          type: 'POST',
+          data: { project_id: projectID },
+          success: function(response) {
+            // Handle the success response here
+            console.log(response);
+            const rowId = response.rowid;
+            const name = response.name;
+            const state = response.state;
+            const color = response.color;
+            const padding = response.padding;
+
+            const row = `
+              <div class="row align-items-center" id="row-${rowId}">
+                <div class="col-7">
+                  <p>${name}</p>
+                  <input type="text" style="display:none">
+                </div>
+                <div class="col-1">
+                  <button class="btn btn-primary edit-btn" data-row-id="${rowId}"> <i class="fa-solid fa-pen"></i> </button>
+                  <button class="btn btn-success save-btn" data-row-id="${rowId}" style="display:none"> <i class="fa-solid fa-check"></i> </button>
+                </div>
+                <div class="col-1">
+                  <button class="btn btn-danger delete-btn" data-row-id="${rowId}"> <i class="fa-solid fa-xmark"></i> </button>
+                </div>
+                <div class="dropdown col-1">
+                  <button class="btn btn-${color} dropdown-toggle" type="button" id="stateDropdown${rowId}" data-bs-toggle="dropdown" aria-expanded="false">
+                    ${state}${padding}
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="stateDropdown${rowId}">
+                    <li><a class="dropdown-item" data-new-value="Planning" data-row-id="${rowId}">Planning</a></li>
+                    <li><a class="dropdown-item" data-new-value="Working" data-row-id="${rowId}">Working</a></li>
+                    <li><a class="dropdown-item" data-new-value="Done" data-row-id="${rowId}">Done</a></li>
+
+                  </ul>
+                </div> 
+                <div class="col-1">
+                  <button class="btn btn-primary details-button" data-bs-toggle="offcanvas" data-bs-target="#det${rowId}" onclick="console.log(${rowId});">Details</button>
+                </div>
+              </div>
+            `;
+
+            $('#projectContent-list').append(row);
+
+
+            $('.dropdown-item').on('click', function() {
+                const newValue = $(this).data('new-value');
+                const rowId = $(this).data('row-id');
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const activeProjectId = urlParams.get('project_id');
+                // Make AJAX call to save row to database
+                $.ajax({
+                  url: "savestate.php",
+                  type: "POST",
+                  data: { text: newValue, id: rowId, project_id: activeProjectId },
+                  success: function(response) {
+                    // If the row was saved successfully, update the row text
+                    console.log("saved state with: " + rowId);
+                    
+                    // Update the visual appearance based on the new state
+                    const stateButton = $(`#stateDropdown${rowId}`);
+                    const dropdownItem = $(this);
+                    const color = newValue === 'Done' ? 'success' : (newValue === 'Working' ? 'warning' : 'secondary bg-opacity-50');
+                    const padding = newValue === 'Done' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : (newValue === 'Working' ? '&nbsp;' : '');
+                    stateButton.removeClass().addClass(`btn btn-${color} dropdown-toggle`);
+                    stateButton.html(`${newValue}${padding}`);
+                    
+                    // Close the dropdown menu
+                    dropdownItem.closest('.dropdown-menu').removeClass('show');
+                  },
+                  error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert("Error saving row. Please try again.");
+                  }
+                });
+              });
+
+              
+
+
+          },
+          error: function(xhr, status, error) {
+            // Handle the error response here
+            console.error(xhr.responseText);
+          }
+        });
+      });
+
+
+
+      $('.dropdown-item').on('click', function() {
+  const newValue = $(this).data('new-value');
+  const rowId = $(this).data('row-id');
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const activeProjectId = urlParams.get('project_id');
+  // Make AJAX call to save row to database
+  $.ajax({
+    url: "savestate.php",
+    type: "POST",
+    data: { text: newValue, id: rowId, project_id: activeProjectId },
+    success: function(response) {
+      // If the row was saved successfully, update the row text
+      console.log("saved state with: " + rowId);
+      
+      // Update the visual appearance based on the new state
+      const stateButton = $(`#stateDropdown${rowId}`);
+      const dropdownItem = $(this);
+      const color = newValue === 'Done' ? 'success' : (newValue === 'Working' ? 'warning' : 'secondary bg-opacity-50');
+      const padding = newValue === 'Done' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : (newValue === 'Working' ? '&nbsp;' : '');
+      stateButton.removeClass().addClass(`btn btn-${color} dropdown-toggle`);
+      stateButton.html(`${newValue}${padding}`);
+      
+      // Close the dropdown menu
+      dropdownItem.closest('.dropdown-menu').removeClass('show');
+    },
+    error: function(xhr, status, error) {
+      console.error(xhr.responseText);
+      alert("Error saving row. Please try again.");
+    }
   });
+});
+
+
+
+
+
+
+
+
+
+    },
+    error: function(xhr, status, error) {
+      // Handle the error response here
+      console.error(xhr.responseText);
+    }
+  });
+
+
 
   $.ajax({
       url: 'getdetails.php',
@@ -292,38 +534,36 @@ $('a[data-project-id="' + projectId + '"]').addClass('active');
 
 <script>
 
-function delrow(rowId) {
+
+
+
+
+
+$(document).on('click', '.delete-btn', function() {
+  const rowId = $(this).data('row-id');
   var queryString = window.location.search;
   var urlParams = new URLSearchParams(queryString);
   var activeProjectId = urlParams.get('project_id');
-// Get the row element
-if (confirm("Are you sure you want to delete this task?")) {
-// Get the value of the input box
 
-
-// Set the new value to the text element
-
-// Hide the input box and show the text
-
-// Make AJAX call to save row to database
-$.ajax({
-  url: "delrow.php",
-  type: "POST",
-  data: { id: rowId, project_id: activeProjectId },
-  success: function(response) {
-    // If the row was saved successfully, update the row text
-    console.log("deleted row with: "+activeProjectId)
-    loadProject(response);
-    location.reload();
-  },
-  error: function(xhr, status, error) {
-    console.error(xhr.responseText);
-    alert("Error saving row. Please try again.");
+  // Confirm deletion
+  if (confirm("Are you sure you want to delete this task?")) {
+    // Make AJAX call to delete row from the database
+    $.ajax({
+      url: "delrow.php",
+      type: "POST",
+      data: { id: rowId, project_id: activeProjectId },
+      success: function(response) {
+        // If the row was deleted successfully, update the project content
+        console.log("Deleted row with ID: " + rowId);
+      },
+      error: function(xhr, status, error) {
+        console.error(xhr.responseText);
+        alert("Error deleting row. Please try again.");
+      }
+    });
   }
-  
 });
-}
-}
+
 
 
 
@@ -456,7 +696,12 @@ function deleteProject(projectId) {
       data: { id: projectId },
       success: function(response) {
         // If the request was successful, remove the corresponding row from the sidebar
-        location.reload();
+        const projectEntry = document.querySelector(`[data-project-id="${projectId}"]`).parentNode;
+    
+    // Remove the project entry element
+    if (projectEntry) {
+        projectEntry.remove();
+    }
 
       },
       error: function(xhr, status, error) {
@@ -490,9 +735,250 @@ $.ajax({
   
 });
    
-
-
 }
+
+let countdownInterval;
+
+
+
+function checkSharingStatus() {
+    // Make an AJAX call to checksharingstatus.php
+    $.ajax({
+        url: 'checksharingstatus.php',
+        type: 'POST',
+        success: function(response) {
+            // Parse the JSON response
+            const data = JSON.parse(response);
+
+            // Update the sharing link element based on the sharing status
+            const shareLinkElement = document.getElementById('shareLink');
+
+            const currentURL = window.location.href;
+            const baseURL = currentURL.substring(0, currentURL.lastIndexOf('/') + 1);
+            const shareLink = baseURL + '/?share=' + data.guestidentifier;
+
+            if (data.status === '1') {
+                // Sharing is active
+                shareLinkElement.textContent = shareLink; // Assuming the link property contains the sharing link
+                document.getElementById('startSharingButton').style.display = 'none';
+                document.getElementById('stopSharingButton').style.display = 'inline-block';
+
+
+                document.getElementById('shareDurationGroup').style.display = 'none';
+                document.getElementById('timeLeftGroup').style.display = 'block';
+
+                const timeLeftElement = document.getElementById('timeLeft');
+
+            // Start the countdown timer if no countdown is currently running
+            if (!countdownInterval) {
+                startCountdown(data.endtime, timeLeftElement);
+              }
+
+            } else {
+                // Sharing is inactive
+                shareLinkElement.textContent = 'Not sharing';
+                document.getElementById('startSharingButton').style.display = 'inline-block';
+                document.getElementById('stopSharingButton').style.display = 'none';
+
+
+                stopCountdown()
+
+
+
+
+            document.getElementById('timeLeftGroup').style.display = 'none';
+            document.getElementById('shareDurationGroup').style.display = 'block';
+
+            }
+        },
+        error: function(xhr, status, error) {
+            // Handle the error response here
+            console.error(xhr.responseText);
+        }
+    });
+}
+
+// Event listener for the "Start Sharing" button
+document.getElementById('startSharingButton').addEventListener('click', function () {
+    startSharing();
+});
+
+// Event listener for the "Stop Sharing" button
+document.getElementById('stopSharingButton').addEventListener('click', function () {
+    stopSharing();
+});
+
+function startSharing() {
+    const shareDuration = document.getElementById('shareDuration').value;
+
+    // Make an AJAX call to startsharing.php
+    $.ajax({
+        url: 'startsharing.php',
+        type: 'POST',
+        data: { duration: shareDuration },
+        success: function(response) {
+            // Handle the success response here
+            console.log(response);
+            const data = JSON.parse(response);
+            // Update the share link element with the generated share link
+            const shareLinkElement = document.getElementById('shareLink');
+            // Assuming you have the generated identifier stored in a variable called 'identifier'
+            const currentURL = window.location.href;
+            const baseURL = currentURL.substring(0, currentURL.lastIndexOf('/') + 1);
+            const shareLink = baseURL + '/?share=' + data.guestidentifier;
+
+            shareLinkElement.textContent = shareLink; // Assuming the response contains the generated share link
+
+            // Update the button display
+            document.getElementById('startSharingButton').style.display = 'none';
+            document.getElementById('stopSharingButton').style.display = 'inline-block';
+
+            document.getElementById('shareDurationGroup').style.display = 'none';
+            document.getElementById('timeLeftGroup').style.display = 'block';
+
+            const timeLeftElement = document.getElementById('timeLeft');
+
+            // Start the countdown timer if no countdown is currently running
+            if (!countdownInterval) {
+                startCountdown(data.endtime, timeLeftElement);
+              }
+
+
+
+
+
+
+
+
+            
+        },
+        error: function(xhr, status, error) {
+            // Handle the error response here
+            console.error(xhr.responseText);
+        }
+    });
+}
+
+function stopSharing() {
+    // Make an AJAX call to stopsharing.php
+    $.ajax({
+        url: 'stopsharing.php',
+        type: 'POST',
+        success: function(response) {
+            // Handle the success response here
+            console.log(response);
+
+            // Clear the share link element
+            const shareLinkElement = document.getElementById('shareLink');
+            shareLinkElement.textContent = '';
+
+            // Update the button display
+            document.getElementById('startSharingButton').style.display = 'inline-block';
+            document.getElementById('stopSharingButton').style.display = 'none';
+            shareLinkElement.textContent = 'Not sharing';
+
+            
+
+            stopCountdown()
+
+
+
+
+            document.getElementById('timeLeftGroup').style.display = 'none';
+            document.getElementById('shareDurationGroup').style.display = 'block';
+
+
+
+
+
+
+        },
+        error: function(xhr, status, error) {
+            // Handle the error response here
+            console.error(xhr.responseText);
+        }
+    });
+}
+
+
+function startCountdown(endtime, timeLeftElement) {
+    const endTime = new Date(endtime).getTime(); // Convert the endtime to milliseconds
+
+    // Update the countdown every second
+    countdownInterval = setInterval(function() {
+        const now = new Date().getTime(); // Get the current time
+        const timeLeft = endTime - now; // Calculate the remaining time
+        // Check if the countdown has finished
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            timeLeftElement.textContent = 'Expired';
+            return;
+        }
+
+        // Convert the remaining time to hours, minutes, and seconds
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        // Display the remaining time in the time left element
+        timeLeftElement.textContent = hours + 'h ' + minutes + 'm ' + seconds + 's';
+    }, 1000);
+}
+
+function stopCountdown() {
+  clearInterval(countdownInterval);
+  countdownInterval = null;
+}
+
+
+
+
+// Check the sharing status when the modal is shown
+$('#shareModal').on('shown.bs.modal', function () {
+    checkSharingStatus();
+});
+
+
+
+
+function updateDurationLabel(value) {
+  const durationLabel = document.getElementById('durationLabel');
+  if (value == 1) {
+    durationLabel.textContent = '1 Hour';
+  } else {
+    durationLabel.textContent = value + ' Hours';
+  }
+}
+
+
+// Copy the share link text to the clipboard
+function copyToClipboard() {
+        const shareLinkElement = document.getElementById('shareLink');
+        const shareLinkText = shareLinkElement.textContent;
+        
+        navigator.clipboard.writeText(shareLinkText)
+            .then(() => {
+                // Show a success message and hide it after 1 second
+                const copyNotification = document.getElementById('copyNotification');
+                copyNotification.classList.add('show-notification');
+                
+                setTimeout(() => {
+                    copyNotification.classList.remove('show-notification');
+                }, 1000);
+                
+                console.log('Share link copied to clipboard!');
+            })
+            .catch((error) => {
+                console.error('Unable to copy share link: ', error);
+            });
+    }
+    
+    // Add a click event listener to the copy button
+    const copyButton = document.getElementById('copyButton');
+    copyButton.addEventListener('click', copyToClipboard);
+
+
 </script>
 
 

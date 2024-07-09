@@ -23,66 +23,59 @@ $result = mysqli_query($conn, $query);
 
 
 
-echo '<div class="container">';
+echo '<div class="container">
+<div id="projectContent-list">';
 while ($row = mysqli_fetch_assoc($result)) {
   $state = $row['state'];
   $rowid = $row['id'];
   $color = $state == 'done' ? 'success' : ($state == 'working' ? 'warning' : 'secondary bg-opacity-50');
   $padding = $state == 'done' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : ($state == 'working' ? '&nbsp;' : '');
-  echo'
-  <div class="row align-items-center" id="'.$row['id'].'">
-  <div class="col-7">
-    <p>'.$row['name'].'</p>
-    <input type="text" style="display:none">
-  </div>
-  <div class="col-1">
-    <button onclick="editRow('.$rowid.')" class="btn btn-primary edit-btn" data-row-id="'.$rowid.'"> <i class="fa-solid fa-pen"></i> </button>
-    <button onclick="saveRow('.$rowid.')" class="btn btn-success save-btn" data-row-id="'.$rowid.'" style="display:none"> <i class="fa-solid fa-check"></i> </button>
-  </div>
 
-  <div class="col-1">
-  <button onclick="delrow('.$rowid.')" class="btn btn-danger delete-btn" data-row-id="'.$rowid.'"> <i class="fa-solid fa-xmark"></i> </button>
+  echo '<div class="row align-items-center" id="row-'.$row['id'].'">
+    <div class="col-7">
+      <p>'.$row['name'].'</p>
+      <input type="text" style="display:none">
+    </div>
+    <div class="col-1">
+      <button class="btn btn-primary edit-btn" data-row-id="'.$row['id'].'"> <i class="fa-solid fa-pen"></i> </button>
+      <button class="btn btn-success save-btn" data-row-id="'.$row['id'].'" style="display:none"> <i class="fa-solid fa-check"></i> </button>
+    </div>
+    <div class="col-1">
+      <button class="btn btn-danger delete-btn" data-row-id="'.$row['id'].'"> <i class="fa-solid fa-xmark"></i> </button>
+    </div>
+    <div class="dropdown col-1">
+      <button class="btn btn-'.$color.' dropdown-toggle" type="button" id="stateDropdown'.$row['id'].'" data-bs-toggle="dropdown" aria-expanded="false">
+        '.$state.$padding.'
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="stateDropdown'.$row['id'].'">
+      <li><a class="dropdown-item" data-new-value="Planning" data-row-id="'.$row['id'].'">Planning</a></li>
+      <li><a class="dropdown-item" data-new-value="Working" data-row-id="'.$row['id'].'">Working</a></li>
+      <li><a class="dropdown-item" data-new-value="Done" data-row-id="'.$row['id'].'">Done</a></li>
+      </ul>
+    </div> 
+    <div class="col-1">
+      <button class="btn btn-primary details-button" data-bs-toggle="offcanvas" data-bs-target="#det'.$row['id'].'" onclick="console.log('.$row['id'].');">Details</button>
+    </div>
   </div>
-  <div class="dropdown col-1">
-  <button class="btn btn-'.$color.' dropdown-toggle" type="button" id="stateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-  '.$state.$padding.'
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="stateDropdown">
-    <li><a class="dropdown-item" onclick="savestate(\'Planning\','.$rowid.')">Planning</a></li>
-    <li><a class="dropdown-item" onclick="savestate(\'Working\','.$rowid.')">Working</a></li>
-    <li><a class="dropdown-item" onclick="savestate(\'Done\','.$rowid.')">Done</a></li>
-  </ul>
-</div> 
-
-
-
-  <div class="col-1">
-  <button class="btn btn-primary details-button" data-bs-toggle="offcanvas" data-bs-target="#det'.$rowid.'" onclick="console.log('.$rowid.');">Details</button>
-  </div>
-</div>';
+  ';
 }
-echo "</table>";
-echo '        <div class="col-md-12">
-<div id="projectContent">
 
-      <!-- Add Row Form -->
-      <form action="addrow.php" method="POST">
-              <input type="hidden" name="project_id" value="'.$project_id.'">
-              <div class="form-group">
-                  <input type="hidden" type="text" class="form-control" id="name" name="name" value="Task name here">
-              </div>
-              <div class="form-group">
-              <select class="form-control" id="state" name="state" style="display: none;">
-              <option value="planning" selected></option>
-          </select>
-              </div">
-              <button type="submit" class="btn btn-primary mt-1" style="width:90.6%"><i class="fa-regular fa-plus"></i></button>
-          </form>
+
+echo "</div>
+</table>";
+echo '        <div class="col-md-12">
+<div >
+    <button id="addRowButton" class="btn btn-primary mt-1" style="width:90.6%"><i class="fa-regular fa-plus"></i></button>
+  </div>
 
       
       
           </div>  
+          
 ';
+
+
+
 
 // Close the database connection
 mysqli_close($conn);

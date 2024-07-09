@@ -1,13 +1,13 @@
 <?php
-
+date_default_timezone_set('Europe/Tallinn');
 
 
 
 // Database connection settings
 
-define('DB_SERVER', '192.168.124.14');
-define('DB_USERNAME', 'kandres');
-define('DB_PASSWORD', 'A1sed34gh');
+define('DB_SERVER', 'localhost');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', '');
 $dbname = "login";
 
 // Create the database connection
@@ -27,30 +27,33 @@ if ($conn->query($sql) === false) {
 // Select the database
 $conn->select_db($dbname);
 
-// Create the projects table if it doesn't exist
+// Create the login table if it doesn't exist
 $sql = "CREATE TABLE IF NOT EXISTS users (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
+    identifier VARCHAR(8),
+    guest_identifier VARCHAR(10),
+    guest_identifier_expiration_time DATETIME,
+    admin_low BOOLEAN DEFAULT false,
+    admin_high BOOLEAN DEFAULT false,
+    admin_super_high BOOLEAN DEFAULT false,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )";
 if ($conn->query($sql) === false) {
   die("Error creating table: " . $conn->error);
 }
-/*
-$query = "SELECT COUNT(*) FROM users";
-$result = mysqli_query($conn, $query);
-$row = mysqli_fetch_row($result);
-$num_users = $row[0];
 
-// If there are no users, add a default user with username "root" and password "root"
-if ($num_users == 0) {
-    $username = "root";
-    $password = hash('sha512', 'SecretPassw0rd!');
-    $query = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
-    mysqli_query($conn, $query);
+$sql = "CREATE TABLE IF NOT EXISTS recover (
+  id INT(11) AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL,
+  identifier VARCHAR(8) NOT NULL,
+  recoverdata VARCHAR(8000) NOT NULL,
+  delete_at DATETIME
+)";
+if ($conn->query($sql) === false) {
+die("Error creating table: " . $conn->error);
 }
-*/
 
 // Database credentials
 define('DB_NAME', 'login');
